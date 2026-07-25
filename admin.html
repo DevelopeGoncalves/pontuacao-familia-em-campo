@@ -59,6 +59,31 @@
         <button type="submit" class="btn-lancar">🚀 Lançar pontos</button>
         <p id="lancar-mensagem" class="mensagem"></p>
       </form>
+
+      <div id="ultimo-lancamento" class="ultimo-lancamento oculto">
+        <span id="ultimo-lancamento-texto"></span>
+        <button type="button" id="btn-cancelar-ultimo" class="btn-cancelar-ultimo">↩️ Cancelar último ponto</button>
+      </div>
+    </section>
+
+    <!-- Cronômetro -->
+    <section class="painel-secao">
+      <h2>⏱️ Cronômetro</h2>
+      <div id="cronometro-display" class="cronometro-display">02:00</div>
+
+      <label class="rotulo">Duração da brincadeira</label>
+      <div class="pontos-rapidos">
+        <button type="button" class="pt-rapido duracao-rapida" data-segundos="60">1 min</button>
+        <button type="button" class="pt-rapido duracao-rapida" data-segundos="120">2 min</button>
+        <button type="button" class="pt-rapido duracao-rapida" data-segundos="180">3 min</button>
+        <button type="button" class="pt-rapido duracao-rapida" data-segundos="300">5 min</button>
+      </div>
+
+      <div class="cronometro-controles">
+        <button type="button" id="btn-cronometro-iniciar" class="btn-secundario-solido">▶️ Iniciar</button>
+        <button type="button" id="btn-cronometro-pausar" class="btn-secundario-solido">⏸️ Pausar</button>
+        <button type="button" id="btn-cronometro-reiniciar" class="btn-secundario-solido">🔄 Reiniciar</button>
+      </div>
     </section>
 
     <!-- Nova atividade -->

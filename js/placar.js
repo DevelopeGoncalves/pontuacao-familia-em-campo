@@ -2,11 +2,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import {
   getFirestore,
   collection,
+  doc,
   onSnapshot,
   query,
   orderBy,
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-import { firebaseConfig, FIREBASE_APP_NAME, COLLECTIONS } from "./firebase-config.js";
+import { firebaseConfig, FIREBASE_APP_NAME, COLLECTIONS, CRONOMETRO_DOC_ID } from "./firebase-config.js";
+import { segundosRestantes, formatarTempo } from "./cronometro.js";
 
 const app = initializeApp(firebaseConfig, FIREBASE_APP_NAME);
 const db = getFirestore(app);
@@ -14,6 +16,8 @@ const db = getFirestore(app);
 const grid = document.getElementById("times-grid");
 const vazio = document.getElementById("estado-vazio");
 const somToggle = document.getElementById("som-toggle");
+const cronometroBox = document.getElementById("cronometro-box");
+const cronometroNumero = document.getElementById("cronometro-numero");
 
 let somLigado = true;
 somToggle.addEventListener("click", () => {
@@ -208,6 +212,62 @@ function render(times) {
     barra.style.width = pct + "%";
   });
 }
+
+// ------------------------------------------------------------------
+// Cronômetro (controlado pelo admin, sincronizado em tempo real)
+// ------------------------------------------------------------------
+function tocarAlarme() {
+  if (!somLigado) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const agora = audioCtx.currentTime;
+    [700, 700, 700].forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(freq, agora + i * 0.28);
+      gain.gain.setValueAtTime(0.0001, agora + i * 0.28);
+      gain.gain.exponentialRampToValueAtTime(0.2, agora + i * 0.28 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, agora + i * 0.28 + 0.22);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(agora + i * 0.28);
+      osc.stop(agora + i * 0.28 + 0.25);
+    });
+  } catch (e) {
+    /* áudio indisponível — ignora silenciosamente */
+  }
+}
+
+let estadoCronometroAtual = null;
+let ultimoSegundosExibido = null;
+
+function renderCronometro() {
+  if (!estadoCronometroAtual) {
+    cronometroBox.classList.add("oculto");
+    return;
+  }
+  cronometroBox.classList.remove("oculto");
+  const restantes = segundosRestantes(estadoCronometroAtual);
+  cronometroNumero.textContent = formatarTempo(restantes);
+
+  const rodando = estadoCronometroAtual.estado === "rodando";
+  cronometroBox.classList.toggle("acabando", rodando && restantes > 0 && restantes <= 10);
+
+  if (rodando && ultimoSegundosExibido > 0 && restantes === 0) {
+    cronometroBox.classList.add("esgotado");
+    tocarAlarme();
+  }
+  if (!rodando || restantes > 0) {
+    cronometroBox.classList.remove("esgotado");
+  }
+  ultimoSegundosExibido = restantes;
+}
+setInterval(renderCronometro, 250);
+
+onSnapshot(doc(db, COLLECTIONS.cronometro, CRONOMETRO_DOC_ID), (snap) => {
+  estadoCronometroAtual = snap.exists() ? snap.data() : null;
+  renderCronometro();
+});
 
 // Se em alguns segundos nenhum dado chegar (ex: firebase-config.js ainda com
 // placeholders, ou sem internet), avisa em vez de deixar a tela em branco.

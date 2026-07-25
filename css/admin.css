@@ -283,6 +283,80 @@ input[type="text"] {
   color: #c62828;
 }
 
+/* Cancelar último ponto */
+.ultimo-lancamento {
+  margin-top: 0.9rem;
+  padding: 0.7rem 0.9rem;
+  background: #fff8e1;
+  border: 2px solid #ffca28;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.ultimo-lancamento span {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #6d4c00;
+}
+.btn-cancelar-ultimo {
+  border: none;
+  background: #ff7043;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-cancelar-ultimo:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Cronômetro */
+.cronometro-display {
+  font-family: "Fredoka", sans-serif;
+  font-size: 3.2rem;
+  font-weight: 700;
+  text-align: center;
+  background: #263238;
+  color: #eceff1;
+  border-radius: 16px;
+  padding: 0.6rem;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.4rem;
+}
+.cronometro-display.rodando {
+  color: #69f0ae;
+}
+.cronometro-controles {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+.btn-secundario-solido {
+  flex: 1;
+  padding: 0.7rem 0.4rem;
+  border: none;
+  border-radius: 12px;
+  background: #1e88e5;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+#btn-cronometro-pausar {
+  background: #6d4c41;
+}
+#btn-cronometro-reiniciar {
+  background: #78909c;
+}
+
 .linha-nova-atividade {
   display: flex;
   gap: 0.5rem;

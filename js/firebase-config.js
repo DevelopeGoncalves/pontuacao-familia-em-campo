@@ -29,7 +29,12 @@ export const COLLECTIONS = {
   times: "familiaEmCampo2_times",
   atividades: "familiaEmCampo2_atividades",
   lancamentos: "familiaEmCampo2_lancamentos",
+  cronometro: "familiaEmCampo2_cronometro",
 };
+
+// Documento único (singleton) onde o estado do cronômetro fica salvo, para
+// sincronizar em tempo real entre o painel admin e o placar público.
+export const CRONOMETRO_DOC_ID = "estado";
 
 // Times padrão do evento — criados automaticamente (se ainda não existirem)
 // quando o admin faz login pela primeira vez.

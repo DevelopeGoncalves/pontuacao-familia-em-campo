@@ -71,8 +71,13 @@ Para o dia do evento, o mais simples é publicar no **Firebase Hosting** (gráti
    - Escolha a brincadeira (ou cadastre uma nova em "Atividades da gincana").
    - Toque num valor rápido (+1/+5/+10/+20) ou digite a pontuação.
    - Toque em **"🚀 Lançar pontos"** — o placar na TV atualiza sozinho, com confete e som.
-4. Errou um lançamento? Em "Últimos lançamentos", toque em ↩️ para desfazer (a pontuação é subtraída de volta).
-5. Quer recomeçar do zero? Use "Zerar pontuação de todos os times" na Zona de risco (pede confirmação dupla).
+4. Errou o último lançamento? Logo abaixo do botão "Lançar pontos" aparece uma caixa
+   **"Último: ..."** com o botão **"↩️ Cancelar último ponto"** — cancela só esse, sem mexer no total
+   dos outros. (Dá pra desfazer qualquer lançamento antigo também, em "Últimos lançamentos".)
+5. **⏱️ Cronômetro**: escolha a duração da brincadeira (1/2/3/5 min), toque em "▶️ Iniciar". O tempo
+   aparece contando no telão em tempo real (`index.html`), pulsa vermelho nos últimos 10s e apita quando
+   zera. "⏸️ Pausar" congela o tempo, "🔄 Reiniciar" volta para a duração escolhida.
+6. Quer recomeçar do zero? Use "Zerar pontuação de todos os times" na Zona de risco (pede confirmação dupla).
 
 ## Estrutura de dados (Firestore)
 
@@ -81,6 +86,11 @@ Para o dia do evento, o mais simples é publicar no **Firebase Hosting** (gráti
 - `familiaEmCampo2_atividades/{id}` → `{ nome, criadoEm }`
 - `familiaEmCampo2_lancamentos/{id}` → `{ timeId, atividade, pontos, adminEmail, criadoEm }`
   (histórico completo — cada lançamento soma pontos ao time via transação atômica).
+- `familiaEmCampo2_cronometro/estado` → `{ estado, duracaoSegundos, segundosRestantes, terminaEmMs }`
+  (documento único, compartilhado entre admin e placar em tempo real).
+
+⚠️ Se você já colou o conteúdo antigo de `firestore.rules` no Firebase Console, precisa colar de novo
+(ou só adicionar o bloco novo `match /familiaEmCampo2_cronometro/...`) para o cronômetro funcionar.
 
 ## Arquivos
 
@@ -90,7 +100,8 @@ admin.html           → painel do admin (login + lançar pontos)
 css/placar.css       → estilo do placar
 css/admin.css        → estilo do painel admin
 js/firebase-config.js→ credenciais do Firebase (PREENCHER)
+js/cronometro.js     → cálculo compartilhado do tempo restante do cronômetro
 js/placar.js         → lógica do placar em tempo real
-js/admin.js          → lógica de login, lançamento de pontos e histórico
+js/admin.js          → lógica de login, lançamento de pontos, cronômetro e histórico
 firestore.rules      → regras de segurança do Firestore
 ```

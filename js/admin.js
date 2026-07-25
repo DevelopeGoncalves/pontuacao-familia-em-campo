@@ -21,7 +21,10 @@ import {
   runTransaction,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-import { firebaseConfig, FIREBASE_APP_NAME, COLLECTIONS, TIMES_PADRAO } from "./firebase-config.js";
+import { firebaseConfig, FIREBASE_APP_NAME, COLLECTIONS, TIMES_PADRAO, CRONOMETRO_DOC_ID } from "./firebase-config.js";
+import { segundosRestantes, formatarTempo } from "./cronometro.js";
+
+const DURACAO_PADRAO_SEGUNDOS = 120;
 
 const app = initializeApp(firebaseConfig, FIREBASE_APP_NAME);
 const auth = getAuth(app);
@@ -49,8 +52,20 @@ const historicoLista = document.getElementById("historico-lista");
 const btnReset = document.getElementById("btn-reset");
 const resumoTimes = document.getElementById("resumo-times");
 
+const ultimoLancamentoBox = document.getElementById("ultimo-lancamento");
+const ultimoLancamentoTexto = document.getElementById("ultimo-lancamento-texto");
+const btnCancelarUltimo = document.getElementById("btn-cancelar-ultimo");
+
+const cronometroDisplay = document.getElementById("cronometro-display");
+const btnCronometroIniciar = document.getElementById("btn-cronometro-iniciar");
+const btnCronometroPausar = document.getElementById("btn-cronometro-pausar");
+const btnCronometroReiniciar = document.getElementById("btn-cronometro-reiniciar");
+const botoesDuracaoRapida = document.querySelectorAll(".duracao-rapida");
+
 let timeSelecionadoId = null;
 let timesCache = [];
+let ultimosLancamentos = [];
+let estadoCronometroAtual = null;
 
 // ------------------------------------------------------------------
 // Autenticação
@@ -243,7 +258,35 @@ function nomeDoTime(timeId) {
   return t ? `${t.emoji} ${t.nome}` : timeId;
 }
 
+function renderUltimoLancamento() {
+  const ultimo = ultimosLancamentos[0];
+  if (!ultimo) {
+    ultimoLancamentoBox.classList.add("oculto");
+    return;
+  }
+  ultimoLancamentoBox.classList.remove("oculto");
+  ultimoLancamentoTexto.textContent = `Último: ${nomeDoTime(ultimo.timeId)} +${ultimo.pontos} pts (${ultimo.atividade})`;
+  btnCancelarUltimo.disabled = false;
+}
+
+btnCancelarUltimo.addEventListener("click", async () => {
+  const ultimo = ultimosLancamentos[0];
+  if (!ultimo) return;
+  if (!confirm(`Cancelar o último ponto lançado (${nomeDoTime(ultimo.timeId)} +${ultimo.pontos} pts)?`)) return;
+  btnCancelarUltimo.disabled = true;
+  try {
+    await desfazerLancamento(ultimo.id);
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao cancelar o último ponto.");
+    btnCancelarUltimo.disabled = false;
+  }
+});
+
 function renderHistorico(lancamentos) {
+  ultimosLancamentos = lancamentos;
+  renderUltimoLancamento();
+
   if (lancamentos.length === 0) {
     historicoLista.innerHTML = '<li class="historico-vazio">Nenhum ponto lançado ainda.</li>';
     return;
@@ -293,6 +336,60 @@ async function desfazerLancamento(lancamentoId) {
 }
 
 // ------------------------------------------------------------------
+// Cronômetro (estado compartilhado no Firestore, sincroniza com o placar)
+// ------------------------------------------------------------------
+const cronometroRef = doc(db, COLLECTIONS.cronometro, CRONOMETRO_DOC_ID);
+
+function renderCronometro() {
+  cronometroDisplay.textContent = formatarTempo(segundosRestantes(estadoCronometroAtual));
+  cronometroDisplay.classList.toggle("rodando", estadoCronometroAtual?.estado === "rodando");
+}
+setInterval(renderCronometro, 250);
+
+botoesDuracaoRapida.forEach((btn) => {
+  btn.addEventListener("click", async () => {
+    const segundos = parseInt(btn.dataset.segundos, 10);
+    await setDoc(cronometroRef, {
+      estado: "parado",
+      duracaoSegundos: segundos,
+      segundosRestantes: segundos,
+      terminaEmMs: null,
+    });
+  });
+});
+
+btnCronometroIniciar.addEventListener("click", async () => {
+  const duracao = estadoCronometroAtual?.duracaoSegundos || DURACAO_PADRAO_SEGUNDOS;
+  const restantes = segundosRestantes(estadoCronometroAtual) || duracao;
+  await setDoc(cronometroRef, {
+    estado: "rodando",
+    duracaoSegundos: duracao,
+    segundosRestantes: restantes,
+    terminaEmMs: Date.now() + restantes * 1000,
+  });
+});
+
+btnCronometroPausar.addEventListener("click", async () => {
+  if (estadoCronometroAtual?.estado !== "rodando") return;
+  await setDoc(cronometroRef, {
+    estado: "pausado",
+    duracaoSegundos: estadoCronometroAtual?.duracaoSegundos || DURACAO_PADRAO_SEGUNDOS,
+    segundosRestantes: segundosRestantes(estadoCronometroAtual),
+    terminaEmMs: null,
+  });
+});
+
+btnCronometroReiniciar.addEventListener("click", async () => {
+  const duracao = estadoCronometroAtual?.duracaoSegundos || DURACAO_PADRAO_SEGUNDOS;
+  await setDoc(cronometroRef, {
+    estado: "parado",
+    duracaoSegundos: duracao,
+    segundosRestantes: duracao,
+    terminaEmMs: null,
+  });
+});
+
+// ------------------------------------------------------------------
 // Resetar pontuação geral
 // ------------------------------------------------------------------
 btnReset.addEventListener("click", async () => {
@@ -338,4 +435,9 @@ function iniciarListeners() {
       renderHistorico(lancamentos);
     }
   );
+
+  onSnapshot(cronometroRef, (snap) => {
+    estadoCronometroAtual = snap.exists() ? snap.data() : null;
+    renderCronometro();
+  });
 }
