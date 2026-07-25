@@ -218,19 +218,27 @@ h1 span {
 
 #times-grid {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1500px;
   display: grid;
-  grid-template-columns: repeat(4, minmax(220px, 1fr));
-  gap: 1.6rem;
+  grid-template-columns: repeat(4, minmax(240px, 1fr));
+  gap: 1.8rem;
   margin-top: 1.5rem;
 }
 
 @media (max-width: 1000px) {
   #times-grid {
-    grid-template-columns: repeat(2, minmax(220px, 1fr));
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
   }
 }
+/* No celular mantemos 2 colunas para caber todos os times na tela do telão,
+   mas com cards e textos bem maiores para leitura à distância. */
 @media (max-width: 560px) {
+  #times-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+@media (max-width: 360px) {
   #times-grid {
     grid-template-columns: 1fr;
   }
@@ -241,7 +249,7 @@ h1 span {
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.06));
   border: 3px solid var(--cor-clara, #fff);
   border-radius: 28px;
-  padding: 1.6rem 1.2rem 1.4rem;
+  padding: 2rem 1.4rem 1.8rem;
   text-align: center;
   backdrop-filter: blur(6px);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
@@ -286,7 +294,7 @@ h1 span {
 }
 
 .time-mascote {
-  font-size: clamp(2.6rem, 5vw, 4rem);
+  font-size: clamp(3.2rem, 5.5vw, 4.6rem);
   animation: mascoteBalanco 3s ease-in-out infinite;
   margin-top: 0.6rem;
 }
@@ -304,7 +312,7 @@ h1 span {
 .time-nome {
   font-family: "Fredoka", sans-serif;
   font-weight: 700;
-  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem);
   margin: 0.3rem 0 0.4rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
 }
@@ -312,7 +320,7 @@ h1 span {
 .time-pontos {
   font-family: "Fredoka", sans-serif;
   font-weight: 700;
-  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  font-size: clamp(3.6rem, 6.2vw, 5.2rem);
   line-height: 1;
   margin: 0.2rem 0 0.7rem;
   text-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
@@ -320,7 +328,7 @@ h1 span {
 
 .time-barra-wrap {
   width: 100%;
-  height: 0.9rem;
+  height: 1.1rem;
   background: rgba(0, 0, 0, 0.25);
   border-radius: 999px;
   overflow: hidden;
