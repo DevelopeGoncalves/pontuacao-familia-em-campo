@@ -251,9 +251,14 @@ input[type="text"] {
   color: #fff;
 }
 
-.btn-lancar {
-  width: 100%;
+.lancar-acoes {
+  display: flex;
+  gap: 0.6rem;
   margin-top: 1.1rem;
+}
+
+.btn-lancar {
+  flex: 2;
   padding: 1rem;
   border: none;
   border-radius: 16px;
@@ -268,6 +273,29 @@ input[type="text"] {
 .btn-lancar:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.btn-tirar {
+  flex: 1;
+  padding: 1rem 0.6rem;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(90deg, #c62828, #e53935);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.05rem;
+  font-family: "Fredoka", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(198, 40, 40, 0.35);
+}
+.btn-tirar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Lançamentos de remoção no histórico */
+.historico-info .pts-negativo {
+  color: #c62828;
 }
 
 .mensagem {

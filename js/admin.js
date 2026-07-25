@@ -47,6 +47,8 @@ const inputNovaAtividade = document.getElementById("input-nova-atividade");
 const inputPontos = document.getElementById("input-pontos");
 const botoesRapidos = document.querySelectorAll(".pt-rapido");
 const formLancar = document.getElementById("form-lancar");
+const btnLancar = formLancar.querySelector("button[type=submit]");
+const btnTirar = document.getElementById("btn-tirar");
 const lancarMensagem = document.getElementById("lancar-mensagem");
 const historicoLista = document.getElementById("historico-lista");
 const btnReset = document.getElementById("btn-reset");
@@ -198,10 +200,10 @@ botoesRapidos.forEach((btn) => {
 });
 
 // ------------------------------------------------------------------
-// Lançar pontos (transação atômica: soma no time + grava histórico)
+// Dar / tirar pontos (transação atômica: soma no time + grava histórico)
+// sinal = +1 para dar pontos, -1 para tirar pontos
 // ------------------------------------------------------------------
-formLancar.addEventListener("submit", async (e) => {
-  e.preventDefault();
+async function registrarPontos(sinal) {
   lancarMensagem.textContent = "";
   lancarMensagem.className = "mensagem";
 
@@ -218,39 +220,70 @@ formLancar.addEventListener("submit", async (e) => {
   }
   const atividadeNome = selectAtividade.value || "Pontos bônus";
   const timeInfo = timesCache.find((t) => t.id === timeSelecionadoId);
+  const nomeTime = `${timeInfo?.emoji || ""} ${timeInfo?.nome || ""}`.trim();
 
-  const btnEnviar = formLancar.querySelector("button[type=submit]");
-  btnEnviar.disabled = true;
+  btnLancar.disabled = true;
+  btnTirar.disabled = true;
   try {
-    await lancarPontos(timeSelecionadoId, atividadeNome, pontos, auth.currentUser?.email || "admin");
-    lancarMensagem.textContent = `+${pontos} pts para ${timeInfo?.emoji || ""} ${timeInfo?.nome || ""}! 🎉`;
-    lancarMensagem.classList.add("sucesso");
+    const aplicado = await lancarPontos(
+      timeSelecionadoId,
+      atividadeNome,
+      sinal * pontos,
+      auth.currentUser?.email || "admin"
+    );
+    if (aplicado === 0) {
+      lancarMensagem.textContent = `${nomeTime} já está com 0 pontos.`;
+      lancarMensagem.classList.add("erro");
+    } else if (aplicado < 0) {
+      const removidos = -aplicado;
+      const extra = removidos < pontos ? " (chegou a 0)" : "";
+      lancarMensagem.textContent = `−${removidos} pts de ${nomeTime}${extra}.`;
+      lancarMensagem.classList.add("sucesso");
+    } else {
+      lancarMensagem.textContent = `+${aplicado} pts para ${nomeTime}! 🎉`;
+      lancarMensagem.classList.add("sucesso");
+    }
     inputPontos.value = "";
   } catch (err) {
     console.error(err);
     lancarMensagem.textContent = "Erro ao lançar pontos. Tente novamente.";
     lancarMensagem.classList.add("erro");
   } finally {
-    btnEnviar.disabled = false;
+    btnLancar.disabled = false;
+    btnTirar.disabled = false;
   }
-});
+}
 
-async function lancarPontos(timeId, atividadeNome, pontos, adminEmail) {
+formLancar.addEventListener("submit", (e) => {
+  e.preventDefault();
+  registrarPontos(1);
+});
+btnTirar.addEventListener("click", () => registrarPontos(-1));
+
+// Aplica um delta (positivo ou negativo) ao time, sem deixar a pontuação
+// ficar negativa. Retorna quantos pontos foram realmente aplicados
+// (0 se não houve mudança, ex.: tirar pontos de um time já zerado).
+async function lancarPontos(timeId, atividadeNome, delta, adminEmail) {
   const timeRef = doc(db, COLLECTIONS.times, timeId);
   const lancamentoRef = doc(collection(db, COLLECTIONS.lancamentos));
+  let aplicado = delta;
   await runTransaction(db, async (tx) => {
     const timeSnap = await tx.get(timeRef);
     if (!timeSnap.exists()) throw new Error("Time não encontrado");
     const atual = timeSnap.data().pontos || 0;
-    tx.update(timeRef, { pontos: atual + pontos });
+    const novo = Math.max(0, atual + delta);
+    aplicado = novo - atual;
+    if (aplicado === 0) return; // nada a fazer — não grava lançamento vazio
+    tx.update(timeRef, { pontos: novo });
     tx.set(lancamentoRef, {
       timeId,
       atividade: atividadeNome,
-      pontos,
+      pontos: aplicado,
       adminEmail,
       criadoEm: serverTimestamp(),
     });
   });
+  return aplicado;
 }
 
 // ------------------------------------------------------------------
@@ -261,6 +294,11 @@ function nomeDoTime(timeId) {
   return t ? `${t.emoji} ${t.nome}` : timeId;
 }
 
+// Mostra o valor com sinal: +10 para pontos dados, −10 para pontos tirados.
+function formatarPontos(pontos) {
+  return pontos < 0 ? `−${Math.abs(pontos)}` : `+${pontos}`;
+}
+
 function renderUltimoLancamento() {
   const ultimo = ultimosLancamentos[0];
   if (!ultimo) {
@@ -268,14 +306,14 @@ function renderUltimoLancamento() {
     return;
   }
   ultimoLancamentoBox.classList.remove("oculto");
-  ultimoLancamentoTexto.textContent = `Último: ${nomeDoTime(ultimo.timeId)} +${ultimo.pontos} pts (${ultimo.atividade})`;
+  ultimoLancamentoTexto.textContent = `Último: ${nomeDoTime(ultimo.timeId)} ${formatarPontos(ultimo.pontos)} pts (${ultimo.atividade})`;
   btnCancelarUltimo.disabled = false;
 }
 
 btnCancelarUltimo.addEventListener("click", async () => {
   const ultimo = ultimosLancamentos[0];
   if (!ultimo) return;
-  if (!confirm(`Cancelar o último ponto lançado (${nomeDoTime(ultimo.timeId)} +${ultimo.pontos} pts)?`)) return;
+  if (!confirm(`Cancelar o último lançamento (${nomeDoTime(ultimo.timeId)} ${formatarPontos(ultimo.pontos)} pts)?`)) return;
   btnCancelarUltimo.disabled = true;
   try {
     await desfazerLancamento(ultimo.id);
@@ -298,10 +336,11 @@ function renderHistorico(lancamentos) {
   lancamentos.forEach((l) => {
     const li = document.createElement("li");
     const hora = l.criadoEm?.toDate ? l.criadoEm.toDate().toLocaleTimeString("pt-BR") : "--:--";
+    const classePts = l.pontos < 0 ? "pts-negativo" : "";
     li.innerHTML = `
       <div class="historico-info">
         <strong>${nomeDoTime(l.timeId)}</strong>
-        <span>+${l.pontos} pts · ${l.atividade}</span>
+        <span class="${classePts}">${formatarPontos(l.pontos)} pts · ${l.atividade}</span>
         <small>${hora} · ${l.adminEmail || ""}</small>
       </div>
       <button type="button" class="btn-desfazer" data-id="${l.id}" title="Desfazer">↩️</button>
@@ -333,7 +372,7 @@ async function desfazerLancamento(lancamentoId) {
     const timeRef = doc(db, COLLECTIONS.times, timeId);
     const timeSnap = await tx.get(timeRef);
     const atual = timeSnap.data()?.pontos || 0;
-    tx.update(timeRef, { pontos: atual - pontos });
+    tx.update(timeRef, { pontos: Math.max(0, atual - pontos) });
     tx.delete(lancamentoRef);
   });
 }

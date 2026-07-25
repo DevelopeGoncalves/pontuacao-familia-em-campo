@@ -49,14 +49,17 @@
 
         <label class="rotulo" for="input-pontos">3. Quantos pontos?</label>
         <div class="pontos-rapidos">
-          <button type="button" class="pt-rapido" data-valor="1">+1</button>
-          <button type="button" class="pt-rapido" data-valor="5">+5</button>
-          <button type="button" class="pt-rapido" data-valor="10">+10</button>
-          <button type="button" class="pt-rapido" data-valor="20">+20</button>
+          <button type="button" class="pt-rapido" data-valor="1">1</button>
+          <button type="button" class="pt-rapido" data-valor="5">5</button>
+          <button type="button" class="pt-rapido" data-valor="10">10</button>
+          <button type="button" class="pt-rapido" data-valor="20">20</button>
         </div>
         <input type="number" id="input-pontos" min="1" placeholder="Ou digite um valor..." />
 
-        <button type="submit" class="btn-lancar">🚀 Lançar pontos</button>
+        <div class="lancar-acoes">
+          <button type="submit" class="btn-lancar">🚀 Dar pontos</button>
+          <button type="button" id="btn-tirar" class="btn-tirar">➖ Tirar pontos</button>
+        </div>
         <p id="lancar-mensagem" class="mensagem"></p>
       </form>
 
