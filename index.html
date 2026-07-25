@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2° Família em Campo — Placar</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏆</text></svg>" />
+  <link rel="stylesheet" href="css/placar.css" />
+</head>
+<body>
+  <canvas id="confete-canvas"></canvas>
+  <div id="fundo-flutuante"></div>
+
+  <button id="som-toggle" title="Ligar/desligar som">🔊</button>
+
+  <div class="pagina">
+    <header>
+      <div class="evento-selo">Gincana do Ministério Infantil</div>
+      <h1 id="titulo">
+        <span style="animation-delay:0.0s">2°</span>
+        <span style="animation-delay:0.1s">Família</span>
+        <span style="animation-delay:0.2s">em</span>
+        <span style="animation-delay:0.3s">Campo</span>
+      </h1>
+      <p class="subtitulo">🏆 Placar ao vivo — que vença o melhor time! 🏆</p>
+    </header>
+
+    <div id="times-grid"></div>
+
+    <div id="estado-vazio">
+      <div class="emoji-grande">🎪</div>
+      <p>Aguardando o início da gincana...<br />Peça para o admin inicializar os times no painel.</p>
+    </div>
+
+    <footer>2° Família em Campo · Placar em tempo real</footer>
+  </div>
+
+  <script type="module" src="js/placar.js"></script>
+</body>
+</html>

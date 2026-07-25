@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2° Família em Campo — Painel Admin</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+
+  <!-- ===================== TELA DE LOGIN ===================== -->
+  <div id="tela-login">
+    <div class="login-card">
+      <div class="emoji-topo">🎯</div>
+      <h1>Painel do Admin</h1>
+      <p class="sub">2° Família em Campo — lançamento de pontos</p>
+      <form id="form-login">
+        <label for="login-email">E-mail</label>
+        <input type="email" id="login-email" required autocomplete="username" value="admin@gmail.com" placeholder="admin@evento.com" />
+        <label for="login-senha">Senha</label>
+        <input type="password" id="login-senha" required autocomplete="current-password" value="admin123" placeholder="••••••••" />
+        <button type="submit" class="btn-primario">Entrar</button>
+        <p id="login-erro" class="erro"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================== PAINEL (pós-login) ===================== -->
+  <div id="tela-painel" class="oculto">
+    <div class="painel-header">
+      <div>
+        <h1>🎯 Painel Admin</h1>
+        <span class="usuario" id="usuario-logado"></span>
+      </div>
+      <button id="btn-logout" class="btn-secundario">Sair</button>
+    </div>
+
+    <!-- Lançar pontos -->
+    <section class="painel-secao">
+      <h2>🏆 Lançar pontos</h2>
+
+      <label class="rotulo">1. Escolha o time</label>
+      <div id="times-selecao"></div>
+
+      <form id="form-lancar">
+        <label class="rotulo" for="select-atividade">2. Brincadeira / atividade</label>
+        <select id="select-atividade"></select>
+
+        <label class="rotulo" for="input-pontos">3. Quantos pontos?</label>
+        <div class="pontos-rapidos">
+          <button type="button" class="pt-rapido" data-valor="1">+1</button>
+          <button type="button" class="pt-rapido" data-valor="5">+5</button>
+          <button type="button" class="pt-rapido" data-valor="10">+10</button>
+          <button type="button" class="pt-rapido" data-valor="20">+20</button>
+        </div>
+        <input type="number" id="input-pontos" min="1" placeholder="Ou digite um valor..." />
+
+        <button type="submit" class="btn-lancar">🚀 Lançar pontos</button>
+        <p id="lancar-mensagem" class="mensagem"></p>
+      </form>
+    </section>
+
+    <!-- Nova atividade -->
+    <section class="painel-secao">
+      <h2>🎪 Atividades da gincana</h2>
+      <p style="margin:0 0 .3rem;color:#666;font-size:.9rem;">Cadastre aqui as brincadeiras para elas aparecerem na lista acima.</p>
+      <form id="form-nova-atividade" class="linha-nova-atividade">
+        <input type="text" id="input-nova-atividade" placeholder="Ex: Corrida do saco" />
+        <button type="submit">Adicionar</button>
+      </form>
+    </section>
+
+    <!-- Resumo -->
+    <section class="painel-secao">
+      <h2>📊 Placar atual</h2>
+      <div id="resumo-times"></div>
+      <a class="link-placar" href="index.html" target="_blank">🔗 Abrir tela do placar</a>
+    </section>
+
+    <!-- Histórico -->
+    <section class="painel-secao">
+      <h2>🕓 Últimos lançamentos</h2>
+      <ul id="historico-lista"></ul>
+    </section>
+
+    <!-- Zona de risco -->
+    <section class="painel-secao zona-risco">
+      <h2>⚠️ Zona de risco</h2>
+      <button id="btn-reset" class="btn-perigo">Zerar pontuação de todos os times</button>
+    </section>
+  </div>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+rules_version = '2';
+
+// ============================================================================
+// Regras de segurança — 2° Família em Campo
+// ============================================================================
+// ⚠️ IMPORTANTE — projeto cadastro-final-cc77f já está em produção:
+// NÃO substitua o arquivo de regras inteiro no Firebase Console. Só ADICIONE
+// os 3 blocos "match /familiaEmCampo2_..." abaixo para DENTRO das regras que
+// já existem lá (entre as chaves de "match /databases/{database}/documents"),
+// mantendo tudo que já está escrito. Se este projeto usa só Realtime Database
+// (databaseURL) e ainda não tem regras de Firestore configuradas, aí sim pode
+// usar este arquivo inteiro como está.
+//
+// Lógica:
+//  - Qualquer pessoa pode LER o placar e as atividades (é isso que aparece
+//    no telão público em index.html — não precisa de login para assistir).
+//  - Só um usuário AUTENTICADO (admin logado via admin.html) pode ESCREVER
+//    pontos, atividades ou lançamentos.
+//  - Os nomes de coleção usam o prefixo "familiaEmCampo2_" para isolar este
+//    evento de qualquer outro dado que já exista no mesmo projeto Firebase.
+// ============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- INÍCIO: blocos deste evento (cole dentro das suas regras atuais) ----
+    match /familiaEmCampo2_times/{timeId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    match /familiaEmCampo2_atividades/{atividadeId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    match /familiaEmCampo2_lancamentos/{lancamentoId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    // ---- FIM: blocos deste evento ----
+
+  }
+}
