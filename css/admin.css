@@ -333,6 +333,34 @@ input[type="text"] {
 .cronometro-display.rodando {
   color: #69f0ae;
 }
+.cronometro-personalizado {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+.cronometro-personalizado input {
+  width: 4.2rem;
+  padding: 0.6rem 0.5rem;
+  text-align: center;
+}
+.cronometro-personalizado span {
+  font-weight: 700;
+  color: #666;
+  font-size: 0.85rem;
+}
+.cronometro-personalizado button {
+  margin-left: auto;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 12px;
+  background: #1e88e5;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
 .cronometro-controles {
   display: flex;
   gap: 0.5rem;

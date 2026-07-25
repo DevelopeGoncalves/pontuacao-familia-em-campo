@@ -61,6 +61,9 @@ const btnCronometroIniciar = document.getElementById("btn-cronometro-iniciar");
 const btnCronometroPausar = document.getElementById("btn-cronometro-pausar");
 const btnCronometroReiniciar = document.getElementById("btn-cronometro-reiniciar");
 const botoesDuracaoRapida = document.querySelectorAll(".duracao-rapida");
+const inputCronometroMin = document.getElementById("input-cronometro-min");
+const inputCronometroSeg = document.getElementById("input-cronometro-seg");
+const btnCronometroDefinir = document.getElementById("btn-cronometro-definir");
 
 let timeSelecionadoId = null;
 let timesCache = [];
@@ -346,16 +349,26 @@ function renderCronometro() {
 }
 setInterval(renderCronometro, 250);
 
-botoesDuracaoRapida.forEach((btn) => {
-  btn.addEventListener("click", async () => {
-    const segundos = parseInt(btn.dataset.segundos, 10);
-    await setDoc(cronometroRef, {
-      estado: "parado",
-      duracaoSegundos: segundos,
-      segundosRestantes: segundos,
-      terminaEmMs: null,
-    });
+async function definirDuracaoCronometro(segundos) {
+  if (!segundos || segundos <= 0) return;
+  await setDoc(cronometroRef, {
+    estado: "parado",
+    duracaoSegundos: segundos,
+    segundosRestantes: segundos,
+    terminaEmMs: null,
   });
+}
+
+botoesDuracaoRapida.forEach((btn) => {
+  btn.addEventListener("click", () => definirDuracaoCronometro(parseInt(btn.dataset.segundos, 10)));
+});
+
+btnCronometroDefinir.addEventListener("click", () => {
+  const min = parseInt(inputCronometroMin.value, 10) || 0;
+  const seg = parseInt(inputCronometroSeg.value, 10) || 0;
+  definirDuracaoCronometro(min * 60 + seg);
+  inputCronometroMin.value = "";
+  inputCronometroSeg.value = "";
 });
 
 btnCronometroIniciar.addEventListener("click", async () => {

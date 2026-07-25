@@ -79,6 +79,15 @@
         <button type="button" class="pt-rapido duracao-rapida" data-segundos="300">5 min</button>
       </div>
 
+      <label class="rotulo">Ou digite um tempo personalizado</label>
+      <div class="cronometro-personalizado">
+        <input type="number" id="input-cronometro-min" min="0" placeholder="min" />
+        <span>min</span>
+        <input type="number" id="input-cronometro-seg" min="0" max="59" placeholder="seg" />
+        <span>seg</span>
+        <button type="button" id="btn-cronometro-definir">Definir</button>
+      </div>
+
       <div class="cronometro-controles">
         <button type="button" id="btn-cronometro-iniciar" class="btn-secundario-solido">▶️ Iniciar</button>
         <button type="button" id="btn-cronometro-pausar" class="btn-secundario-solido">⏸️ Pausar</button>
